@@ -14,8 +14,13 @@ class Node:
     """
 
     def __init__(self, ID, network_ref=None):
-        self.ID, self._network_ref, self.nports = ID, network_ref, 0
+        self.ID, self._network_ref = ID, network_ref
         self.data = {}
+
+    @property
+    def deg(self):
+        """Returns the degree (i.e. number of ports) of this node."""
+        return self._deg
 
     def send(self, port, m):
         """Sends a message through the given port. Non-blocking."""
@@ -54,7 +59,7 @@ class Network:
             self.msgs[label] = Queue()
             n = nodecls(node_id, self)
             self.nodes.append(n)
-            n.nports, n._label = len(ports), label
+            n._deg, n._label = len(ports), label
             for i, to in enumerate(ports):
                 js = [ j for j, n in enumerate(topo[to]) if n == label ]
                 assert len(js) == 1, "Topology is invalid -- edges must be bidirectional."
