@@ -4,17 +4,17 @@ Also: trivial usage example.
 """
 
 from da import Node, Network
-from dautils import procedural_topo
+from dautils import topo
 
 class MyNode(Node):
     def run(self):
         self.send(0, self.ID)
-        p, m = self.recv()
-        self.log("received message {} on port {}", m, p)
+        self.send(1, self.ID)
+        p, m = self.recv(); self.log("received message {} on port {}", m, p)
+        p, m = self.recv(); self.log("received message {} on port {}", m, p)
 
 def run(n):
-    topo = procedural_topo(range(n), lambda i: [ (i+d)%n for d in range(1, n) ])
-    net = Network(MyNode, topo)
+    net = Network(MyNode, topo.C(n))
     net.run()
 
 if __name__ == '__main__':
