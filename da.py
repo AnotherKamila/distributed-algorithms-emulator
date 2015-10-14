@@ -2,7 +2,6 @@ import time
 import random
 from queue import Queue
 from threading import Thread
-#from internal import NodeWorker
 
 class Node:
     """Implements the node concept.
@@ -31,28 +30,26 @@ class Node:
         return self._network_ref.peek(self._label)
 
     def log(self, s, *args):
-        """Log to stdout, adding node ID and timestamp."""
+        """Logs to stdout, adding node label, ID and timestamp."""
         t = time.time() - self._network_ref._start_time
-        print(("[{:10}/{:6} {: 3.6f}] " + s).format(self._label, self.ID, t, *args))
-
-class NodeThread(Thread):
-    def __init__(self, node, termQ):
-        Thread.__init__(self)
-        self.node = node
-        self.termQ = termQ
-
-    def run(self):
-        self.termQ.put(True)
-        self.node.run()
-        self.termQ.get(); self.termQ.task_done()
+        id_len = len(str(len(self._network_ref.nodes)))+1
+        fmt = '[{:10} / {:'+str(id_len)+'} {: 3.6f}] '
+        print((fmt + s).format(self._label, self.ID, t, *args))
 
 class Network:
-    """TODO doc"""
+    """Implements the network concept -- has a topology and a bunch of nodes."""
 
     def __init__(self, nodecls, topo):
+        """Initializes the Network.
+
+        - nodecls is a Node subclass with a run() method
+        - topo is a network topology in the form of {label: [label]} dict;
+          the edges must be bidirectional:
+          forall a, b: (a in topo[b]) == (b in topo[a])
+        """
         self.net, self.msgs, self.nodes = {}, {}, []
 
-        ids = random.sample(range(1000000), len(topo))
+        ids = random.sample(range(10*len(topo)), len(topo))
         for node_id, label, ports in zip(ids, topo.keys(), topo.values()):
             self.msgs[label] = Queue()
             n = nodecls(node_id, self)
@@ -60,7 +57,7 @@ class Network:
             n.nports, n._label = len(ports), label
             for i, to in enumerate(ports):
                 js = [ j for j, n in enumerate(topo[to]) if n == label ]
-                assert len(js) == 1, "Topology is invalid!"
+                assert len(js) == 1, "Topology is invalid -- edges must be bidirectional."
                 self.net[(label, i)] = (to, js[0])
 
     def send(self, from_label, from_port, m):
@@ -78,6 +75,19 @@ class Network:
         return m
 
     def run(self):
+        """Runs the algorithm in all the nodes."""
+
+        class NodeThread(Thread):
+            def __init__(self, node, termQ):
+                Thread.__init__(self)
+                self.node = node
+                self.termQ = termQ
+
+            def run(self):
+                self.termQ.put(True)
+                self.node.run()
+                self.termQ.get(); self.termQ.task_done()
+
         self._start_time = time.time()
         termQ = Queue()  # will be used as sync mechanism: pop on termination
         for n in self.nodes:
