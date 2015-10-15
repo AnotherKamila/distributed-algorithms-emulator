@@ -58,7 +58,7 @@ class Network:
           the edges must be bidirectional:
           forall a, b: (a in topo[b]) == (b in topo[a])
         """
-        self.net, self.msgs, self.nodes = {}, {}, []
+        self.net, self.msgs, self.nodes, self.msgcnt = {}, {}, [], 0
 
         ids = random.sample(range(10*len(topo)), len(topo))
         for node_id, label, ports in zip(ids, topo.keys(), topo.values()):
@@ -77,6 +77,7 @@ class Network:
     def send(self, from_label, from_port, m):
         to_label, to_port = self.net[(from_label, from_port)]
         self.queue(to_label, to_port, m)
+        self.msgcnt += 1
 
     def recv(self, to_label):
         m = self.msgs[to_label].get()
@@ -109,3 +110,4 @@ class Network:
             thr.daemon = True
             thr.start()
         termQ.join()  # wait for termination of all nodes
+        print('({} messages sent)'.format(self.msgcnt))
