@@ -1,7 +1,6 @@
 """Implements broadcast and convergecast on a tree topology."""
 # In the whole file port 0 is assumed to be the parent.
 
-from enum import Enum
 from random import shuffle
 from da import Node, Network
 import topo

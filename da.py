@@ -70,6 +70,7 @@ class Network:
                 js = [ j for j, n in enumerate(topo[to]) if n == label ]
                 assert len(js) == 1, "Topology is invalid -- edges must be bidirectional."
                 self.net[(label, i)] = (to, js[0])
+        print('Network initialized ({} nodes, {} edges)'.format(len(self.nodes), len(self.net)//2))
 
     def queue(self, label, port, m):
         self.msgs[label].put((port, m))
@@ -110,4 +111,4 @@ class Network:
             thr.daemon = True
             thr.start()
         termQ.join()  # wait for termination of all nodes
-        print('({} messages sent)'.format(self.msgcnt))
+        print('Finished ({} messages sent)'.format(self.msgcnt))
