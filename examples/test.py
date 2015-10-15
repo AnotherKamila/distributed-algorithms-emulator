@@ -4,14 +4,15 @@ Also: trivial usage example.
 """
 
 from da import Node, Network
-from dautils import topo
+import topo
 
 class MyNode(Node):
     def run(self):
         self.send(0, self.ID)
         self.send(1, self.ID)
-        p, m = self.recv(); self.log("received message {} on port {}", m, p)
-        p, m = self.recv(); self.log("received message {} on port {}", m, p)
+        p, m = self.recv()
+        p, m = self.recv()
+        self.log('terminating', m, p)
 
 def run(n):
     net = Network(MyNode, topo.C(n))

@@ -24,11 +24,14 @@ class Node:
 
     def send(self, port, m):
         """Sends a message through the given port. Non-blocking."""
+        self.log("-> {}: {}", port, m)
         self._network_ref.send(self._label, port, m)
 
     def recv(self):
         """Receives a message from any port. Blocking."""
-        return self._network_ref.recv(self._label)
+        port, m = self._network_ref.recv(self._label)
+        self.log("<- {}: {}", port, m)
+        return port, m
 
     def peek(self):
         """Peeks at the first incoming message (not removing it). Blocking."""
@@ -42,7 +45,10 @@ class Node:
         print((fmt + s).format(self._label, self.ID, t, *args))
 
 class Network:
-    """Implements the network concept -- has a topology and a bunch of nodes."""
+    """Implements the network concept -- has a topology and a bunch of nodes.
+
+    TODO currently only supports bidirectional topologies -- rewrite
+    """
 
     def __init__(self, nodecls, topo):
         """Initializes the Network.
@@ -65,9 +71,12 @@ class Network:
                 assert len(js) == 1, "Topology is invalid -- edges must be bidirectional."
                 self.net[(label, i)] = (to, js[0])
 
+    def queue(self, label, port, m):
+        self.msgs[label].put((port, m))
+
     def send(self, from_label, from_port, m):
         to_label, to_port = self.net[(from_label, from_port)]
-        self.msgs[to_label].put((to_port, m))
+        self.queue(to_label, to_port, m)
 
     def recv(self, to_label):
         m = self.msgs[to_label].get()
