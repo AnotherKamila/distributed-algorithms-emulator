@@ -4,7 +4,13 @@ distributed-algorithms-emulator
 An emulator of the model we use at the Distributed Algorithms class at my uni (so that I can try writing the actual code).
 
 `da.py` contains the Node and Network classes used to implement the model. If you just want to use this, you don't want to read `da.py`.
-See stuff in the `examples/` directory for usage examples and some of the algorithms taught in the class.
+
+See stuff in the `examples/` directory for usage examples and some of the 
+algorithms taught in the class.
+
+Currently implemented algorithms:
+
+- [broadcast and convergecast on tree topology](https://github.com/AnotherKamila/distributed-algorithms-emulator/blob/master/examples/broadcast.py)
 
 ------------------------------------------------------------------------------
 
